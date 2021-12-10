@@ -1,0 +1,22 @@
+CHIP MultHalf
+{
+    IN a[16], b[16];
+    OUT out[16];
+
+    PARTS:
+
+    TwosCompl(in[0..3]=true, in[4..15] = false, out=neg15);
+
+    Add16(a[0..4]=a[10..14], a[5..15]=false, b=neg15, out=firstExpMin15);
+    Add16(a[0..4]=b[10..14], a[5..15]=false, b=neg15, out=secondExpMin15);
+
+    Add16(a=firstExpMin15, b=secondExpMin15, out=ExpMinus15);
+
+    Add16(a=ExpMinus15, b[0..3]=true, b[4..15] = false, out[0..4]=out[10..14]);
+
+    Mult(a[0] = true, a[1..10] = a[0..9], a[11..15] = false, b[0] = true, b[1..10] = b[0..9], b[11..15] = false, out[0..9]=out[0..9], out=MnozMantis);
+
+    Xor(a=a[15], b=b[15], out=out[15]);
+
+    
+}

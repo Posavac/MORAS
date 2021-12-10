@@ -1,0 +1,23 @@
+CHIP RAM32K{
+
+    IN in[16], addr[15], load;
+    OUT out[16];
+
+    PARTS:
+
+    DMux(in = load, sel = addr[14], a = temp1, b = temp2); 
+    // addr = u koji ram ide
+    // load = 1 -> write, load = 0 -> read
+
+    // ako broj ima vise od 14 bitova ide u drugi ram (overflow)
+    
+    RAM16K(in = in, load = temp1, address = addr[0..13], out = out1); // adresna sabirnica od 14
+    RAM16K(in = in, load = temp2, address = addr[0..13], out = out2);
+
+    // input spremamo
+    // adresa -> gdje u ramu spremamo
+
+    Mux16(a = out1, b = out2, sel = addr[14], out = out);
+    
+    // gleda koji ram da outputa
+}
