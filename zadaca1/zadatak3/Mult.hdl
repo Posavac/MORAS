@@ -1,0 +1,56 @@
+CHIP Mult
+{
+    IN a[16], b[16];
+    OUT out[16];
+
+    PARTS:
+    BitShiftL(in=a       , out=ashift1 );
+    BitShiftL(in=ashift1 , out=ashift2 );
+    BitShiftL(in=ashift2 , out=ashift3 );
+    BitShiftL(in=ashift3 , out=ashift4 );
+    BitShiftL(in=ashift4 , out=ashift5 );
+    BitShiftL(in=ashift5 , out=ashift6 );
+    BitShiftL(in=ashift6 , out=ashift7 );
+    BitShiftL(in=ashift7 , out=ashift8 );
+    BitShiftL(in=ashift8 , out=ashift9 );
+    BitShiftL(in=ashift9 , out=ashift10);
+    BitShiftL(in=ashift10, out=ashift11);
+    BitShiftL(in=ashift11, out=ashift12);
+    BitShiftL(in=ashift12, out=ashift13);
+    BitShiftL(in=ashift13, out=ashift14);
+    BitShiftL(in=ashift14, out=ashift15);
+
+    
+    Mux16(a=false, b=a       , sel=b[0] , out=aux0 );
+    Mux16(a=false, b=ashift1 , sel=b[1] , out=aux1 );
+    Mux16(a=false, b=ashift2 , sel=b[2] , out=aux2 );
+    Mux16(a=false, b=ashift3 , sel=b[3] , out=aux3 );
+    Mux16(a=false, b=ashift4 , sel=b[4] , out=aux4 );
+    Mux16(a=false, b=ashift5 , sel=b[5] , out=aux5 );
+    Mux16(a=false, b=ashift6 , sel=b[6] , out=aux6 );
+    Mux16(a=false, b=ashift7 , sel=b[7] , out=aux7 );
+    Mux16(a=false, b=ashift8 , sel=b[8] , out=aux8 );
+    Mux16(a=false, b=ashift9 , sel=b[9] , out=aux9 );
+    Mux16(a=false, b=ashift10, sel=b[10], out=aux10);
+    Mux16(a=false, b=ashift11, sel=b[11], out=aux11);
+    Mux16(a=false, b=ashift12, sel=b[12], out=aux12);
+    Mux16(a=false, b=ashift13, sel=b[13], out=aux13);
+    Mux16(a=false, b=ashift14, sel=b[14], out=aux14);
+    Mux16(a=false, b=ashift15, sel=b[15], out=aux15);
+
+    Add16(a=aux0 , b=aux1 , out=sum1 );
+    Add16(a=aux2 , b=sum1 , out=sum2 );
+    Add16(a=aux3 , b=sum2 , out=sum3 );
+    Add16(a=aux4 , b=sum3 , out=sum4 );
+    Add16(a=aux5 , b=sum4 , out=sum5 );
+    Add16(a=aux6 , b=sum5 , out=sum6 );
+    Add16(a=aux7 , b=sum6 , out=sum7 );
+    Add16(a=aux8 , b=sum7 , out=sum8 );
+    Add16(a=aux9 , b=sum8 , out=sum9 );
+    Add16(a=aux10, b=sum9 , out=sum10);
+    Add16(a=aux11, b=sum10, out=sum11);
+    Add16(a=aux12, b=sum11, out=sum12);
+    Add16(a=aux13, b=sum12, out=sum13);
+    Add16(a=aux14, b=sum13, out=sum14);
+    Add16(a=aux15, b=sum14, out=out  );
+}

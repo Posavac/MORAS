@@ -1,0 +1,11 @@
+CHIP z2
+{
+IN x,y,z;
+OUT out;
+
+PARTS:
+Not(in=y, out=noy);
+Not(in=z, out=noz);
+And(a=x, b=noy, out=aplusnoy);
+And(a=aplusnoy, b=noz, out=out);
+}
