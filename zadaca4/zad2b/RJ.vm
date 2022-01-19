@@ -1,0 +1,29 @@
+function RJ.fibonacci 2
+
+push constant 1
+push constant 1
+pop local 0
+pop local 1
+
+label LOOP_START
+    push constant 0
+    push argument 0 
+    eq 
+    if-goto LOOP_END
+
+    push local 0
+    push local 1
+    push local 1 
+    pop local 0
+    add 
+    pop local 1 
+
+    push argument 0
+    push constant 1
+    sub 
+    pop argument 0 
+
+    goto LOOP_START
+label LOOP_END
+pop local 1
+return

@@ -1,0 +1,43 @@
+function RJ.mid 0
+
+push argument 0
+push argument 1
+gt
+if-goto (x>y)
+goto (x<y)
+
+label (x>y)
+    push argument 1
+    push argument 2
+    lt
+    if-goto (y<z)
+    push argument 1
+    return
+
+label (y<z)
+    push argument 2
+    push argument 0
+    lt
+    if-goto (z)
+    push argument 0
+    return
+
+label (x<y)
+    push argument 1
+    push argument 2
+    gt
+    if-goto (y>z)
+    push argument 1
+    return
+
+label (y>z)
+    push argument 2
+    push argument 0
+    gt
+    if-goto (z)
+    push argument 0
+    return
+
+label (z)
+    push argument 2
+    return
