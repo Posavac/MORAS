@@ -1,0 +1,34 @@
+class Quick
+{
+    function int partition(Array A, int s , int e)
+    {
+        var int pivot, i, j, temp;
+        let pivot = A[e];
+        let i = s;
+        let j = s;
+        while(j < e){
+            if (A[j] <  pivot)
+            {
+                let temp = A[i];
+                let A[i] = A[j];
+                let A[j] = temp;
+                let i = i + 1;
+            }
+            let j = j+1;
+        }
+        let temp = A[i];
+		let A[i] = A[e];
+		let A[e] = temp;
+        return i;
+    }
+    function void sort(Array A, int s, int e)
+    {
+        var int p;
+        if (s < e){
+            let p = Quick.partition(A,s,e);
+            do Quick.sort(A,s,p-1); //Left side of pivot
+            do Quick.sort(A,p+1,e); //Right side of pivot
+        }
+        return;
+    }
+}

@@ -1,0 +1,140 @@
+class Vint
+{
+    field int size;
+    field Array A;
+    constructor Vint new(int n){
+        do set_size(n);
+        let A = Array.new(size);
+    return this;
+    }
+
+    method int len(){
+        return size;
+    }
+
+    method int set_size(int n){
+        var int i;
+        let size = 1;
+        if(n < 0){
+            let size = 1;
+        }
+        else{
+            let i = 0;
+            while(i < n){
+                let size = Math.multiply(size, 2);
+                let i = 1 + i;
+            }
+        }
+        return size;
+    }
+
+    method void set(int k, int v){
+        if(k > size | k = size){
+            do Output.printString("Invalid index");
+        }
+        if(k < 0){
+            do Output.printString("Invalid index");
+        }
+        let A[k] = v;
+        return;
+    }
+
+    method int get(int k){
+        if(k > size | k = size){
+            do Output.printString("Invalid index");
+        }
+        if(k < 0){
+            do Output.printString("Invalid index");
+        }
+        return A[k];
+    }
+
+    method void resize(int m){
+        var int i, j, n;
+        var Array B;
+        let i = size;
+        let size = set_size(m);
+        let j = Math.min(i, size);
+        let size = i;
+        let B = Array.new(j);
+        let n = 0;
+        while(n < j)
+        {
+            let B[n] = A[n];
+            let n = n + 1;
+        }
+        do A.dispose();
+        let A = B;
+        return;
+    }
+
+    function void is_eq(Vint B, Vint A){ 
+        var int i, j, a, b;
+        if(~(B.len() = A.len())){
+            do Output.printString("Lenghts are not the same");
+        }
+        else{
+            let i = B.len();
+            let j = 0;
+            while(j < i){
+                let a = A.get(j);
+                let b = B.get(j);
+                if(~(a = b)){
+                    do Output.printString("Some elements are not the same value");
+                    return;
+                }
+                let j = j + 1;
+            }
+        }
+        do Output.printString("A is equal to B");
+        return;
+    }
+
+    function bool elems(Vint A, Vint B){
+        var Array C, D;
+        var int s1, s2, i, j, a, b;
+        let s1 = 0;
+        let s2 = 0;
+        let C = Array.new(A.len());
+        let D = Array.new(B.len());
+
+        while(s1 < A.len()){
+            let C[s1] = A.get(s1);
+            let s1 = s1 + 1;
+        }
+        while(s2 < B.len()){
+            let D[s2] = B.get(s2);
+            let s2 = s2 + 1;
+        }
+
+        do Quick.sort(C, 0, A.len() - 1);
+        do Quick.sort(D, 0, B.len() - 1);
+
+        if(~(B.len() = A.len())){
+            do Output.printString("Lenghts are not the same");
+            return false;
+        }
+
+        else{
+            let i = B.len();
+            let j = 0;
+            while(j < i){
+                let a = C[j];
+                let b = D[j];
+                if(~(a = b)){
+                    do Output.printString("Some elements are not the same value");
+                    return false;
+                }
+                let j = j + 1;
+            }
+        }
+        do Output.printString("A is equal to B");
+        return true;
+    }
+
+    method void destruct(){
+        do A.dispose();
+        do Memory.deAlloc(this);
+        return;
+    }    
+}

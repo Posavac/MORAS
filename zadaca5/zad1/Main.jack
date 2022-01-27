@@ -1,0 +1,27 @@
+class Main
+{
+    function void main()
+    {
+        var int i, n;
+        var Array A;
+
+        let n = 15;
+        let A = Array.new(n);
+
+        let i = 0;
+        while (i<n)
+        {
+            let A[i] = n-i;
+            let i = i + 1;
+        }
+        do Quick.sort(A,0,n);
+        let i = 0;
+        while (i<n)
+        {
+            do Output.printInt(A[i]);
+            do Output.printString(" ");
+            let i = i + 1;
+        }
+        return ;
+    }
+}

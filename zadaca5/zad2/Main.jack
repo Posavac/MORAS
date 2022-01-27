@@ -1,0 +1,20 @@
+class Main
+{
+    function void main()
+    {
+        var Vint A, B;
+
+        let A = Vint.new(2);
+        do A.set(0,1);
+        do A.set(1,2);
+
+        let B = Vint.new(2);
+        do B.set(0,1);
+        do B.set(1,2);
+
+        
+        //do Vint.is_eq(A , B);
+		do Vint.elems(A , B);
+		return;
+    }
+}
