@@ -6,6 +6,7 @@ from JackError import *
 #
 
 # Tipovi tokena.
+TK_NONE = 6
 TK_KEYWORD = 1
 TK_SYMBOL = 2
 TK_IDENTIFIER = 3
@@ -135,8 +136,6 @@ class Tokenizer:
                         '/// %d: %s' % (self._lineNum, self._rawline))
 
                 # 1. Uklonimo prvi jednolinijski komentar (npr. find, split).
-                i = self._line.find("//")
-                if i != -1: self._line = self._line[:i]
 
                 # 2. Po potrebi uklanjamo viselinjske komentare kojih moze biti
                 #    proizvoljno mnogo.
@@ -165,6 +164,9 @@ class Tokenizer:
                 #    trazimo token. Parsiranje tokena neka se vrsi u metodi _parseToken.
                 # 5. Ako je nakon uklanjanja komentara linija prazna, ucitavamo novu
                 #    liniju.
+
+                i = self._line.find("//")
+                if i != -1: self._line = self._line[:i]
 
                 if len(self._line) == 0: continue
 
@@ -236,10 +238,12 @@ class Tokenizer:
             if c in numberChars:
                 ret = ret * 10 + int(c)
             else:
-                break
+                if c in ';)] ':
+                    break
+                raise JackError()
+            if (ret > 32767):
+                raise JackError()
             self._line = self._line[1:]
-            if ret > 32768:
-                break
         return ret
 
     # Znamo da je token keyword ili identifier pa ga parsiramo.

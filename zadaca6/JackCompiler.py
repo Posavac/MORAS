@@ -1,7 +1,7 @@
-import sys
-from JackOutput import *
 from JackError import *
 from JackTokenizer import *
+
+xml = True
 
 
 class Compiler:
@@ -33,26 +33,30 @@ class Compiler:
         """
         Compiles <class> :=
             'class' <class-name> '{' <class-var-dec>* <subroutine-dec>* '}'
-
         The tokenizer is expected to be positionsed at the beginning of the
         file.
         """
-        self._writeXMLTag('<class>\n')
 
+        # kljucna rijec class
+        self._writeXMLTag("<class>\n")
         self._nextToken()
         self._expectKeyword(KW_CLASS)
-        self._writeXML('keyword', 'class')
+        self._writeXML("keyword", "class")
 
+        # ime klase
         self._nextToken()
         className = self._expectIdentifier()
-        self._writeXML('identifier', className)
+        self._writeXML("identifier", className)
 
+        # otvorena zagrada
         self._nextToken()
         self._expectSymbol('{')
         self._writeXML('symbol', '{')
 
+        # ucitavanje varijabli (static/field) i metoda/funkcija
         self._nextToken()
 
+        # varijabla
         while True:
             if self._tokenizer.tokenType() != TK_KEYWORD:
                 break
@@ -60,6 +64,7 @@ class Compiler:
                 break
             self._compileClassVarDec()
 
+        # metode i funkcije
         while True:
             if self._tokenizer.tokenType() != TK_KEYWORD:
                 break
@@ -68,26 +73,24 @@ class Compiler:
                 break
             self._compileSubroutine()
 
+        # zatvorena zagrada
         self._expectSymbol('}')
         self._writeXML('symbol', '}')
 
-        self._writeXMLTag('</class>\n')
-
+        self._writeXMLTag("</class>\n")
         if self._tokenizer.next():
-            self._error("Junk after class declaration.")
+            self._error("Junk after end of class definition")
 
     def _compileClassVarDec(self):
         """
         Compiles <class-var-dec> :=
             ('static' | 'field') <type> <var-name> (',' <var-name>)* ';'
-
         ENTRY: Tokenizer positioned on the initial keyword.
         EXIT:  Tokenizer positioned after final ';'.
         """
-        self._writeXMLTag('<classVarDec>\n')
-
+        self._writeXMLTag("<classVarDec>\n")
         storageType = self._expectKeyword((KW_STATIC, KW_FIELD))
-        self._writeXML('keyword', self._tokenizer.keywordStr())
+        self._writeXML("keyword", self._tokenizer.keywordStr())
 
         self._nextToken()
         if self._tokenizer.tokenType() == TK_KEYWORD:
@@ -97,98 +100,124 @@ class Compiler:
         else:
             variableTypeName = self._expectIdentifier()
             variableType = None
-            self._writeXML('identifier', self._tokenizer.identifier())
+            self._writeXML("identifier", self._tokenizer.identifier())
 
+        # Citamo imena varijabli (jedne ili vise) odvojene zarezom.
         self._nextToken()
         while True:
             variableName = self._expectIdentifier()
-            self._writeXML('identifier', self._tokenizer.identifier())
+            self._writeXML("identifier", self._tokenizer.identifier())
             self._nextToken()
             if self._tokenizer.tokenType(
-            ) != TK_SYMBOL or self._tokenizer.symbol() != ',':
+            ) != TK_SYMBOL or self._tokenizer.symbol() != ",":
                 break
-            self._writeXML('symbol', self._tokenizer.symbol())
+            self._writeXML("symbol", self._tokenizer.symbol())
             self._nextToken()
 
+        # Na kraju deklaracije varijable/i ocekujemo znak ';'.
         self._expectSymbol(';')
         self._writeXML('symbol', self._tokenizer.symbol())
         self._nextToken()
 
-        self._writeXMLTag('</classVarDec>\n')
+        self._writeXMLTag("</classVarDec>\n")
 
     def _compileSubroutine(self):
-         """
+        """
         Compiles <subroutine-dec> :=
             ('constructor' | 'function' | 'method') ('void' | <type>)
             <subroutine-name> '(' <parameter-list> ')' <subroutine-body>
-
         ENTRY: Tokenizer positioned on the initial keyword.
         EXIT:  Tokenizer positioned after <subroutine-body>.
         """
         self._writeXMLTag('<subroutineDec>\n')
-        
+
         # tip rutine
-        subroutineType = self._expectKeyword((KW_CONSTRUCTOR, KW_FUNCTION, KW_METHOD))
-        self._writeXML("keyword", self._tokenizer.keywordStr());
-        
+        subroutineType = self._expectKeyword(
+            (KW_CONSTRUCTOR, KW_FUNCTION, KW_METHOD))
+        self._writeXML("keyword", self._tokenizer.keywordStr())
+
         # return type
         self._nextToken()
         if self._tokenizer.tokenType() == TK_KEYWORD:
-            returnType = self._expectKeyword((KW_VOID, KW_CHAR, KW_BOOLEAN, KW_INT))
+            returnType = self._expectKeyword(
+                (KW_VOID, KW_CHAR, KW_BOOLEAN, KW_INT))
             self._writeXML("keyword", self._tokenizer.keywordStr())
         elif self._tokenizer.tokenType() == TK_IDENTIFIER:
             returnType = self._expectIdentifier()
             self._writeXML("identifier", self._tokenizer.keywordStr())
-            
+
         # ime funkcije
         self._nextToken()
         name = self._expectIdentifier()
         self._writeXML("identifier", name)
-        
+
         # ocekuj zagradu (
         self._nextToken()
         self._expectSymbol('(')
         self._writeXML('symbol', self._tokenizer.symbol())
-        
+
         # parametri
         self._nextToken()
         self._compileParameterList()
-        
+
         # zatvori zagradu )
         self._expectSymbol(')')
         self._writeXML('symbol', self._tokenizer.symbol())
-        
+
         # tijelo podrutine
         self._compileSubroutineBody()
-        
+
         self._writeXMLTag('</subroutineDec>\n')
 
     def _compileParameterList(self):
         """
         Compiles <parameter-list> :=
             ( <type> <var-name> (',' <type> <var-name>)* )?
-
         ENTRY: Tokenizer positioned on the initial keyword.
         EXIT:  Tokenizer positioned after <subroutine-body>.
         """
-        pass
+        while True:
+            if self._tokenizer.tokenType(
+            ) == TK_SYMBOL and self._tokenizer.symbol() == ")":
+                break
+
+            if self._tokenizer.tokenType() == TK_KEYWORD:
+                variableType = self._expectKeyword(
+                    (KW_INT, KW_CHAR, KW_BOOLEAN))
+                variableTypeName = None
+                self._writeXML('keyword', self._tokenizer.keywordStr())
+            else:
+                variableTypeName = self._expectIdentifier()
+                variableType = None
+                self._writeXML("identifier", self._tokenizer.identifier())
+
+            self._nextToken()
+            name = self._expectIdentifier()
+            self._writeXML("identifier", name)
+
+            self._nextToken()
+            if self._tokenizer.tokenType(
+            ) != TK_SYMBOL or self._tokenizer.symbol() != ",":
+                break
+
+            self._writeXML("symbol", self._tokenizer.symbol())
+            self._nextToken()
 
     def _compileSubroutineBody(self):
         """
         Compiles <subroutine-body> :=
             '{' <var-dec>* <statements> '}'
-
         The tokenizer is expected to be positioned before the {
         ENTRY: Tokenizer positioned on the initial '{'.
         EXIT:  Tokenizer positioned after final '}'.
         """
         self._writeXMLTag('<subroutineBody>\n')
-        
+
         # ocekuj {
         self._nextToken()
         self._expectSymbol("{")
         self._writeXML("symbol", self._tokenizer.symbol())
-        
+
         # local varijable deklaracija
         self._nextToken()
         while True:
@@ -196,110 +225,147 @@ class Compiler:
                 break
             if self._tokenizer.keyword() != KW_VAR:
                 break
-            self._compileVarDec();
-        
+            self._compileVarDec()
+
         # statements
         self._compileStatements()
-        
+
         # zatvorena zagrada }
         self._nextToken()
         self._expectSymbol("}")
         self._writeXML("symbol", self._tokenizer.symbol())
-        
+
         self._writeXMLTag('</subroutineBody>\n')
 
     def _compileVarDec(self):
         """
         Compiles <var-dec> :=
             'var' <type> <var-name> (',' <var-name>)* ';'
-
         ENTRY: Tokenizer positioned on the initial 'var'.
         EXIT:  Tokenizer positioned after final ';'.
         """
-        pass
+        self._writeXMLTag("<localVarDec>\n")
+
+        # za svaki slucaj provjeri pocinje li s var
+        self._expectKeyword(KW_VAR)
+        self._writeXML("keyword", self._tokenizer.keywordStr())
+
+        # tip varijable
+        self._nextToken()
+        if self._tokenizer.tokenType() == TK_KEYWORD:
+            variableType = self._expectKeyword((KW_INT, KW_CHAR, KW_BOOLEAN))
+            self._writeXML('keyword', self._tokenizer.keywordStr())
+        else:
+            variableTypeName = self._expectIdentifier()
+            self._writeXML("identifier", self._tokenizer.identifier())
+
+        # varijable
+        self._nextToken()
+        while True:
+            name = self._expectIdentifier()
+            self._writeXML("identifier", self._tokenizer.identifier())
+            self._nextToken()
+            if self._tokenizer.tokenType() != TK_SYMBOL:
+                break
+            if self._tokenizer.symbol() != ",":
+                break
+            self._writeXML("symbol", self._tokenizer.symbol())
+            self._nextToken()
+
+        # ; na kraju
+        self._expectSymbol(";")
+        self._writeXML('symbol', self._tokenizer.symbol())
+        self._nextToken()
+
+        self._writeXMLTag("</localVarDec>\n")
 
     def _compileStatements(self):
         """
         Compiles <statements> := (<let-statement> | <if-statement> |
             <while-statement> | <do-statement> | <return-statement>)*
-
         The tokenizer is expected to be positioned on the first statement
         ENTRY: Tokenizer positioned on the first statement.
         EXIT:  Tokenizer positioned after final statement.
         """
-        pass
+        self._writeXMLTag("<classStatments>\n")
+        storageType = self._expectKeyword(
+            (KW_LET, KW_IF, KW_WHILE, KW_DO, KW_RETURN))
 
-    def _compileLet(self):
+        while True:
+            if self._tokenizer.tokenType(
+            ) == TK_KEYWORD and self._tokenizer.keyword() == KW_LET:
+                self._compileLet()
+            elif self._tokenizer.tokenType(
+            ) == TK_KEYWORD and self._tokenizer.keyword() == KW_IF:
+                self._compileIf()
+            elif self._tokenizer.tokenType(
+            ) == TK_KEYWORD and self._tokenizer.keyword() == KW_WHILE:
+                self._compileWhile()
+            elif self._tokenizer.tokenType(
+            ) == TK_KEYWORD and self._tokenizer.keyword() == KW_DO:
+                self._compileDo()
+            elif self._tokenizer.tokenType(
+            ) == TK_KEYWORD and self._tokenizer.keyword() == KW_RETURN:
+                self._compileReturn()
+            else:
+                break
+
+        self._writeXMLTag("</classStatments>\n")
+
+    def _compileLet(self):  #DZ
         """
         Compiles <let-statement> :=
             'let' <var-name> ('[' <expression> ']')? '=' <expression> ';'
-
         ENTRY: Tokenizer positioned on the first keyword.
         EXIT:  Tokenizer positioned after final ';'.
         """
-        self._writeXMLTag("<letStatement>\n")
+        self._writeXMLTag('<letStatement>\n')
 
         self._expectKeyword(KW_LET)
         self._writeXML('keyword', 'let')
-
         self._nextToken()
 
         self._compileTerm()
-        if (self._tokenizer.symbol() == '['):
-            self._compileExpression()
 
         self._expectSymbol('=')
         self._writeXML('symbol', self._tokenizer.symbol())
-
         self._nextToken()
         self._compileExpression()
-
-        self._expectSymbol(';')
-        self._writeXML('symbol', self._tokenizer.symbol())
-        self._writeXMLTag("<\letStatement>\n")
-
+        self._expectSymbol(";")
+        self._writeXML('symbol', ";")
+        self._writeXMLTag('</letStatement>\n')
         self._nextToken()
 
-    def _compileDo(self):
+    def _compileDo(self):  # DZ
         """
         Compiles <do-statement> := 'do' <subroutine-call> ';'
-
         <subroutine-call> := (<subroutine-name> '(' <expression-list> ')') |
             ((<class-name> | <var-name>) '.' <subroutine-name> '('
             <expression-list> ')')
-
         <*-name> := <identifier>
-
         ENTRY: Tokenizer positioned on the first keyword.
         EXIT:  Tokenizer positioned after final ';'.
         """
-        self._writeXMLTag('<do-statement>\n')
-
+        self._writeXMLTag('<doStatement>\n')
         self._expectKeyword(KW_DO)
         self._writeXML('keyword', 'do')
         self._nextToken()
-
         self._compileCall()
-
-        self._expectSymbol(';')
-        self._writeXML('symbol', ';')
-
-        self._writeXMLTag('</do-statement>\n')
+        self._expectSymbol(";")
+        self._writeXML('symbol', ";")
         self._nextToken()
+        self._writeXMLTag('</doStatement>\n')
 
-    def _compileCall(self, subroutineName=None):
+    def _compileCall(self, subroutineName=None):  # DZ
         """
         <subroutine-call> := (<subroutine-name> '(' <expression-list> ')') |
             ((<class-name> | <var-name>) '.' <subroutine-name> '('
             <expression-list> ')')
-
         <*-name> := <identifier>
-
         ENTRY: Tokenizer positioned on the first identifier.
             If 'objectName' is supplied, tokenizer is on the '.'
         EXIT:  Tokenizer positioned after final ';'.
         """
-
         objectName = None
 
         if subroutineName == None:
@@ -312,6 +378,7 @@ class Compiler:
 
         if sym == '.':
             objectName = subroutineName
+            self._nextToken()
             subroutineName = self._expectIdentifier()
             self._writeXML('identifier', subroutineName)
             self._nextToken()
@@ -320,40 +387,45 @@ class Compiler:
             self._writeXML('symbol', self._tokenizer.symbol())
             self._nextToken()
 
-        self._compileExpressionList()
+        if self._tokenizer.symbol() != ')':
+            self._compileExpressionList()
 
         sym = self._expectSymbol(')')
         self._writeXML('symbol', self._tokenizer.symbol())
         self._nextToken()
 
-    def _compileReturn(self):
+    def _compileReturn(self):  # DZ
         """
         Compiles <return-statement> :=
             'return' <expression>? ';'
-
         ENTRY: Tokenizer positioned on the first keyword.
         EXIT:  Tokenizer positioned after final ';'.
         """
-        self._writeXMLTag('<return-statement>\n')
+        self._writeXMLTag('<returnStatement>\n')
 
         self._expectKeyword(KW_RETURN)
         self._writeXML('keyword', 'return')
         self._nextToken()
 
-        self._compileExpression()
+        if self._tokenizer.tokenType() == TK_SYMBOL and self._tokenizer.symbol(
+        ) == ';':
+            self._writeXML('symbol', ";")
+            self._nextToken()
+            self._writeXMLTag('</returnStatement>\n')
+        else:
 
-        self._expectSymbol(';')
-        self._writeXML('symbol', ';')
+            self._compileTerm()
 
-        self._writeXMLTag('</return-statement>\n')
-        self._nextToken()
+            self._expectSymbol(";")
+            self._writeXML('symbol', ";")
+            self._nextToken()
+            self._writeXMLTag('</returnStatement>\n')
 
     def _compileIf(self):
         """
         Compiles <if-statement> :=
             'if' '(' <expression> ')' '{' <statements> '}' ( 'else'
             '{' <statements> '}' )?
-
         ENTRY: Tokenizer positioned on the first keyword.
         EXIT:  Tokenizer positioned after final '}'.
         """
@@ -363,29 +435,29 @@ class Compiler:
         """
         Compiles <while-statement> :=
             'while' '(' <expression> ')' '{' <statements> '}'
-
         ENTRY: Tokenizer positioned on the first keyword.
         EXIT:  Tokenizer positioned after final '}'.
         """
         pass
 
-    def _compileExpression(self):
+    def _compileExpression(self):  # DZ
         """
         Compiles <expression> :=
             <term> (op <term>)*
-
         The tokenizer is expected to be positioned on the expression.
         ENTRY: Tokenizer positioned on the expression.
         EXIT:  Tokenizer positioned after the expression.
         """
         self._writeXMLTag("<expression>\n")
         self._compileTerm()
-        while (self._tokenizer.tokenType()
-               == TK_SYMBOL) and (self._tokenizer.symbol() in '+*-/'):
-            self._expectSymbol(symbols)
-            self._writeXML('symbol', self._tokenizer.symbol())
-            self._nextToken()
-            self._compileTerm()
+        while True:
+            if self._tokenizer.tokenType(
+            ) == TK_SYMBOL and self._tokenizer.symbol() in '+-*/&|<>=':
+                self._writeXML('symbol', self._tokenizer.symbol())
+                self._nextToken()
+                self._compileTerm()
+            else:
+                break
 
         self._writeXMLTag("</expression>\n")
 
@@ -395,11 +467,9 @@ class Compiler:
             <int-const> | <string-const> | <keyword-const> | <var-name> |
             (<var-name> '[' <expression> ']') | <subroutine-call> |
             ( '(' <expression> ')' ) | (<unary-op> <term>)
-
         ENTRY: Tokenizer positioned on the term.
         EXIT:  Tokenizer positioned after the term.
         """
-
         self._writeXMLTag('<term>\n')
 
         if self._tokenizer.tokenType() == TK_INT_CONST:
@@ -427,7 +497,7 @@ class Compiler:
             self._writeXML('symbol', self._tokenizer.symbol())
             self._nextToken()
             self._compileExpression()
-            self._expectSymbol(')')
+            self._expectSymbol(")")
             self._writeXML('symbol', self._tokenizer.symbol())
             self._nextToken()
 
@@ -441,7 +511,7 @@ class Compiler:
                 self._writeXML('symbol', self._tokenizer.symbol())
                 self._nextToken()
                 self._compileExpression()
-                self._expectSymbol(']')
+                self._expectSymbol("]")
                 self._writeXML('symbol', self._tokenizer.symbol())
                 self._nextToken()
 
@@ -454,25 +524,26 @@ class Compiler:
 
         self._writeXMLTag('</term>\n')
 
-    def _compileExpressionList(self):
+    def _compileExpressionList(self):  # DZ
         """
         Compiles <expression-list> :=
             (<expression> (',' <expression>)* )?
-
         ENTRY: Tokenizer positioned on the first expression.
         EXIT:  Tokenizer positioned after the last expression.
         """
-
-        self._writeXMLTag("<expression-list>\n")
-        self._compileExpression()
-        while (self._tokenizer.tokenType()
-               == TK_SYMBOL) and (self._tokenizer.symbol() == ','):
-            self._writeXML('symbol', self._tokenizer.symbol())
-            self._nextToken()
-            #if (self._tokenizer.tokenType() == TK_SYMBOL) and (self._tokenizer.symbol() != ';'):
+        self._writeXMLTag("<expressionList>\n")
+        while True:
+            if self._tokenizer.tokenType(
+            ) == TK_SYMBOL and self._tokenizer.symbol() == ',':
+                self._expectSymbol(',')
+                self._writeXML('symbol', self._tokenizer.symbol())
+                self._nextToken()
+            if self._tokenizer.tokenType(
+            ) == TK_SYMBOL and self._tokenizer.symbol() == ')':
+                break
             self._compileExpression()
 
-        self._writeXMLTag("</expression-list>\n")
+        self._writeXMLTag("</expressionList>\n")
 
     # Pomocne metode.
 
@@ -491,8 +562,7 @@ class Compiler:
         if not self._tokenizer.tokenType() == TK_KEYWORD:
             self._error('Expected ' + self._keywordStr(keywords) + ', got ' +
                         self._tokenizer.tokenTypeStr())
-        if type(keywords) != tuple:
-            keywords = (keywords, )
+        if type(keywords) != tuple: keywords = (keywords, )
         if self._tokenizer.keyword() in keywords:
             return self._tokenizer.keyword()
         self._error('Expected ' + self._keywordStr(keywords) + ', got ' +
@@ -516,27 +586,24 @@ class Compiler:
                     self._symbolStr(self._tokenizer.symbol()))
 
     def _writeXMLTag(self, tag):
-        # if xml:
-        if '/' in tag:
-            self._XMLIndent -= 1
-        self._ofile.write('  ' * self._XMLIndent)
-        self._ofile.write(tag)
-        if '/' not in tag:
-            self._XMLIndent += 1
+        if xml:
+            if '/' in tag: self._XMLIndent -= 1
+            self._ofile.write('  ' * self._XMLIndent)
+            self._ofile.write(tag)
+            if '/' not in tag: self._XMLIndent += 1
 
     def _writeXML(self, tag, value):
-        # if xml:
-        self._ofile.write('  ' * self._XMLIndent)
-        self._ofile.writeXML(tag, value)
+        if xml:
+            self._ofile.write('  ' * self._XMLIndent)
+            self._ofile.writeXML(tag, value)
 
     def _keywordStr(self, keywords):
         if type(keywords) != tuple:
-            return '"' + self._tokenizer.keywordStr(keywords) + '"'
+            return '"' + self.tokenizer.KeywordStr(keywords) + '"'
         ret = ''
         for kw in keywords:
-            if len(ret):
-                ret += ', '
-            ret += '"' + self._tokenizer.keywordStr(kw) + '"'
+            if len(ret): ret += ', '
+            ret += '"' + self.tokenizer.KeywordStr(kw) + '"'
         if len(keywords) > 1:
             ret = 'one of (' + ret + ')'
         return ret
@@ -546,8 +613,7 @@ class Compiler:
             return '"' + symbols + '"'
         ret = ''
         for symbol in symbols:
-            if len(ret):
-                ret += ', '
+            if len(ret): ret += ', '
             ret += '"' + symbol + '"'
         if len(symbols) > 1:
             ret = 'one of (' + ret + ')'
@@ -556,11 +622,7 @@ class Compiler:
 
 def main():
     C = Compiler()
-    if len(sys.argv) > 1:
-        for filename in sys.argv[1:]:
-            C.read(filename)
-    else:
-        C.read("1")
+    C.read("Test")
 
 
 if __name__ == '__main__':
