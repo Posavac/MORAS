@@ -1,0 +1,107 @@
+class CPU{
+    field int sign, za_vratit;
+    constructor CPU new(int znak){
+        let sign = znak;
+        let za_vratit = 0;
+        return this;
+    }
+
+    method int getSign(){
+        return sign;
+    }
+
+    method int getMove(Game Logic){
+        var int pozicija;
+        var Array pomocni;
+        if((Logic.emptySquares()) = 9){
+            let pozicija = 0;
+        }
+        else{
+            if(Logic.emptySquares() = 8){
+                if(Logic.getBoardValue(4) < 9){
+                    let pozicija = 4;
+                }
+                else {
+                    let pozicija = 0;
+                }
+            }
+            else{
+                let pomocni = MiniMax(Logic, sign, 0);
+                let pozicija = pomocni[0];
+            }
+        }
+        
+        return pozicija;
+    }
+
+    method Array MiniMax(Game state, int znak, int depth){
+        var int max_player, other_player, i;
+        var Array best, polje, sim_score;
+        let polje = Array.new(2);
+
+        let max_player = sign;
+
+        if (znak = 10){
+            let other_player = 20;
+        }
+        else{
+            let other_player = 10;
+        }
+        if((state.getGameState() = other_player) | (depth > 5)){
+            if(other_player = max_player)
+            {
+                let polje[1] = (1*state.emptySquares()) + 1;
+            }
+            else
+            {
+                let polje[1] = ((-1)*state.emptySquares()) - 1;
+            }
+            return polje;
+        }
+        else {
+            if (state.emptySquares() = 0){
+                let polje[1] = 0;
+                return polje;
+            }
+        }
+
+        do polje.dispose();
+        let best = Array.new(2);
+        if (znak = max_player){
+            let best[1] = -9999;
+        }
+        else{
+            let best[1] = 9999;
+        }
+        let i = 0;
+        while(i < 9){
+            if((~(state.getBoardValue(i) = 10)) & (~(state.getBoardValue(i) = 20))){
+                do state.MakeMove(i, znak);
+
+                let sim_score = MiniMax(state, other_player, depth + 1);
+
+                //undo:
+                do state.setBoardValue(i, i+1); 
+                do state.setGameState(0);
+                let sim_score[0] = i;
+                if(znak = max_player){
+                    if(sim_score[1] > best[1]){
+                        let best[0] = sim_score[0];
+                        let best[1] = sim_score[1];
+                    }
+                }
+                else{
+                    if(sim_score[1] < best[1]){
+                        let best[0] = sim_score[0];
+                        let best[1] = sim_score[1];
+                    }
+                } 
+                do sim_score.dispose();
+            }
+            
+            let i = i + 1;
+        }
+        do state.setGameState(0);
+        return best;
+    }
+}

@@ -1,0 +1,351 @@
+function CPU.new 0
+push constant 2
+call Memory.alloc 1
+pop pointer 0
+push argument 0
+pop this 0
+push constant 0
+pop this 1
+push pointer 0
+return
+function CPU.getSign 0
+push argument 0
+pop pointer 0
+push this 0
+return
+function CPU.getMove 2
+push argument 0
+pop pointer 0
+push argument 1
+call Game.emptySquares 1
+push constant 9
+eq
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push constant 0
+pop local 0
+goto IF_END0
+label IF_FALSE0
+push argument 1
+call Game.emptySquares 1
+push constant 8
+eq
+if-goto IF_TRUE1
+goto IF_FALSE1
+label IF_TRUE1
+push argument 1
+push constant 4
+call Game.getBoardValue 2
+push constant 9
+lt
+if-goto IF_TRUE2
+goto IF_FALSE2
+label IF_TRUE2
+push constant 4
+pop local 0
+goto IF_END2
+label IF_FALSE2
+push constant 0
+pop local 0
+label IF_END2
+goto IF_END1
+label IF_FALSE1
+push pointer 0
+push argument 1
+push this 0
+push constant 0
+call CPU.MiniMax 4
+pop local 1
+push constant 0
+push local 1
+add
+pop pointer 1
+push that 0
+pop local 0
+label IF_END1
+label IF_END0
+push local 0
+return
+function CPU.MiniMax 6
+push argument 0
+pop pointer 0
+push constant 2
+call Array.new 1
+pop local 4
+push this 0
+pop local 0
+push argument 2
+push constant 10
+eq
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push constant 20
+pop local 1
+goto IF_END0
+label IF_FALSE0
+push constant 10
+pop local 1
+label IF_END0
+push argument 1
+call Game.getGameState 1
+push local 1
+eq
+push argument 3
+push constant 5
+gt
+or
+if-goto IF_TRUE1
+goto IF_FALSE1
+label IF_TRUE1
+push local 1
+push local 0
+eq
+if-goto IF_TRUE2
+goto IF_FALSE2
+label IF_TRUE2
+push constant 1
+push local 4
+add
+push constant 1
+push argument 1
+call Game.emptySquares 1
+call Math.multiply 2
+push constant 1
+add
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+goto IF_END2
+label IF_FALSE2
+push constant 1
+push local 4
+add
+push constant 1
+neg
+push argument 1
+call Game.emptySquares 1
+call Math.multiply 2
+push constant 1
+sub
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+label IF_END2
+push local 4
+return
+goto IF_END1
+label IF_FALSE1
+push argument 1
+call Game.emptySquares 1
+push constant 0
+eq
+if-goto IF_TRUE3
+goto IF_FALSE3
+label IF_TRUE3
+push constant 1
+push local 4
+add
+push constant 0
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push local 4
+return
+label IF_FALSE3
+label IF_END1
+push local 4
+call Array.dispose 1
+pop temp 0
+push constant 2
+call Array.new 1
+pop local 3
+push argument 2
+push local 0
+eq
+if-goto IF_TRUE4
+goto IF_FALSE4
+label IF_TRUE4
+push constant 1
+push local 3
+add
+push constant 9999
+neg
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+goto IF_END4
+label IF_FALSE4
+push constant 1
+push local 3
+add
+push constant 9999
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+label IF_END4
+push constant 0
+pop local 2
+label WHILE_EXP0
+push local 2
+push constant 9
+lt
+not
+if-goto WHILE_END0
+push argument 1
+push local 2
+call Game.getBoardValue 2
+push constant 10
+eq
+not
+push argument 1
+push local 2
+call Game.getBoardValue 2
+push constant 20
+eq
+not
+and
+if-goto IF_TRUE5
+goto IF_FALSE5
+label IF_TRUE5
+push argument 1
+push local 2
+push argument 2
+call Game.MakeMove 3
+pop temp 0
+push pointer 0
+push argument 1
+push local 1
+push argument 3
+push constant 1
+add
+call CPU.MiniMax 4
+pop local 5
+push argument 1
+push local 2
+push local 2
+push constant 1
+add
+call Game.setBoardValue 3
+pop temp 0
+push argument 1
+push constant 0
+call Game.setGameState 2
+pop temp 0
+push constant 0
+push local 5
+add
+push local 2
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push argument 2
+push local 0
+eq
+if-goto IF_TRUE6
+goto IF_FALSE6
+label IF_TRUE6
+push constant 1
+push local 5
+add
+pop pointer 1
+push that 0
+push constant 1
+push local 3
+add
+pop pointer 1
+push that 0
+gt
+if-goto IF_TRUE7
+goto IF_FALSE7
+label IF_TRUE7
+push constant 0
+push local 3
+add
+push constant 0
+push local 5
+add
+pop pointer 1
+push that 0
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push constant 1
+push local 3
+add
+push constant 1
+push local 5
+add
+pop pointer 1
+push that 0
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+label IF_FALSE7
+goto IF_END6
+label IF_FALSE6
+push constant 1
+push local 5
+add
+pop pointer 1
+push that 0
+push constant 1
+push local 3
+add
+pop pointer 1
+push that 0
+lt
+if-goto IF_TRUE8
+goto IF_FALSE8
+label IF_TRUE8
+push constant 0
+push local 3
+add
+push constant 0
+push local 5
+add
+pop pointer 1
+push that 0
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push constant 1
+push local 3
+add
+push constant 1
+push local 5
+add
+pop pointer 1
+push that 0
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+label IF_FALSE8
+label IF_END6
+push local 5
+call Array.dispose 1
+pop temp 0
+label IF_FALSE5
+push local 2
+push constant 1
+add
+pop local 2
+goto WHILE_EXP0
+label WHILE_END0
+push argument 1
+push constant 0
+call Game.setGameState 2
+pop temp 0
+push local 3
+return

@@ -1,0 +1,77 @@
+class Main {
+    function void main(){
+            //Variables:
+            var int input_count, input, unos, potez, check1;
+            var boolean check2;
+            var Player Igrac;
+            var CPU Racunalo;
+            var Game Logic;
+
+            let Logic = Game.new();
+
+            do Logic.StartScreen();
+            
+            while(~(Logic.getBol())){
+                let unos = Keyboard.readInt("");
+                let check1 = Logic.CheckInput(unos);
+            } 
+
+            do Logic.DrawBoard();
+
+            if(check1 = 1){ 
+                let Igrac = Player.new(10);
+                let Racunalo = CPU.new(20);
+                do Output.moveCursor(0, 0);
+                do Output.printString("You are playing as X");
+                do Output.println();
+            }
+            else{
+                let Igrac = Player.new(20);
+                let Racunalo = CPU.new(10);
+                do Output.printString("You are playing as O");
+                do Output.println();
+
+                let potez = Racunalo.getMove(Logic);
+                do Logic.MakeMove(potez, Racunalo.getSign());
+                do Logic.draw(potez, Racunalo.getSign());
+            }
+
+            let input_count = 0;
+            while((Logic.emptySquares() > 0) & (Logic.getGameState() = 0)){
+                let input_count = input_count + 1;
+                if(input_count = 10){
+                    do Screen.setColor(false);
+                    do Screen.drawRectangle(0, 10, 150, 255);
+                    do Screen.setColor(true);
+                    let input_count = 0;
+                    do Output.moveCursor(1,0);
+                }
+                do Output.printString("You:");
+                let input = Keyboard.readInt("") - 1;
+                if((Logic.getBoardValue(input) = 10) | (input > 8) | (input < 0) | (Logic.getBoardValue(input) = 20)){
+                    do Output.printString("Invalid input!");
+                    do Output.println();
+                    let check2 = false;
+                }
+                else{
+                    let check2 = true;
+                }
+                
+                if(check2){
+                    do Logic.MakeMove(input, Igrac.getSign());
+                    do Logic.draw(input, Igrac.getSign());
+                    if((Logic.getGameState() = 0) & (Logic.emptySquares() > 0)){
+                        let potez = Racunalo.getMove(Logic);
+                        do Logic.MakeMove(potez, Racunalo.getSign());
+                        do Logic.draw(potez, Racunalo.getSign());
+                        do Output.printString("Cpu:");
+                        do Output.printInt(potez + 1);
+                        do Output.println();
+                    }
+                }
+            }
+            do Logic.CheckResult(Igrac.getSign(), Racunalo.getSign());
+        
+        return;
+    }
+}

@@ -1,0 +1,294 @@
+class Game{
+    field int GameState, i, broj, offset;
+    field Array Board;
+    field boolean za_vratiti, bol;
+
+    constructor Game new(){
+        let i = 0;
+        let bol = false;
+        let GameState = 0;
+        let Board = Array.new(9);
+        while(i < 9){ 
+            let Board[i] = i + 1;
+            let i = i + 1;
+        }
+        let offset = 24;
+        return this;
+    }
+
+    method boolean getBol(){
+        return bol;
+    }
+    method void printBoard(){
+        let i = 0;
+        while(i < 9){ 
+            do Output.printInt(Board[i]);
+            do Output.printString(", ");
+            let i = i + 1;
+        }
+        do Output.println();
+        return;
+    }
+
+    method int getGameState(){
+        return GameState;
+    }
+
+    method void setGameState(int postavi){
+        let GameState = postavi;
+        return;
+    }
+
+    method Array getBoard(){
+        return Board;
+    }
+
+    method Array getBoardValue(int vrijednost){
+        return Board[vrijednost];
+    }
+
+    method void setBoardValue(int lokacija, int vrijednost){
+        let Board[lokacija] = vrijednost;
+        return;
+    }
+
+    method void DrawBoard(){
+            do Screen.clearScreen();
+            do Screen.drawRectangle(213+offset,10,219+offset,246);
+            do Screen.drawRectangle(294+offset,10,300+offset,246);
+            do Screen.drawRectangle(138+offset,85,375+offset,91);
+            do Screen.drawRectangle(138+offset,166,375+offset,172);
+            do Output.moveCursor(0, 0);
+            return;
+    }
+
+    method void StartScreen(){
+        do Output.moveCursor(0,0);
+        do Output.printString("Hello if you want to play tic tac toe");
+        do Output.moveCursor(2, 0);
+        do Output.printString("Select 1 to go first or 2 to go second");
+        do Output.moveCursor(4,0);
+        return;
+    }
+    method int CheckInput(int unos){
+        if(~(unos = 1) & ~(unos = 2)){
+            let bol = false;
+            do Output.printString("Invalid input");
+            do Output.println();
+        }
+        else{
+            let bol = true;       
+            return unos;
+        }
+        return 0;
+    }
+
+    method void CheckResult(int your_sign, int not_your_sign){
+        if(GameState = your_sign){
+            do Output.printString("You won !");
+        }
+        else {
+            if(GameState = not_your_sign){
+                do Output.printString("You lost !");
+            }
+            else{
+            do Output.printString("It's a Tie !");
+            }
+        }
+        return;
+    }
+
+    method void drawCircle(int position){
+        var int offsetx, offsety;
+        if(position = 0)
+        {let offsetx = 0; let offsety = 162;}
+        if(position = 1)
+        {let offsetx = 81; let offsety = 162;}
+        if(position = 2)
+        {let offsetx = 162; let offsety = 162;}
+        if(position = 3)
+        {let offsetx = 0; let offsety = 81;}
+        if(position = 4)
+        {let offsetx = 81; let offsety = 81;}
+        if(position = 5)
+        {let offsetx = 162; let offsety = 81;}
+        if(position = 6)
+        {let offsetx = 0; let offsety = 0;}
+        if(position = 7)
+        {let offsetx = 81; let offsety = 0;}
+        if(position = 8)
+        {let offsetx = 162; let offsety = 0;}
+        do Screen.drawCircle(176 + offsetx + offset, 48 + offsety, 35);
+        do Screen.setColor(false);
+        do Screen.drawCircle(176 + offsetx + offset, 48 + offsety, 32);
+        do Screen.setColor(true);
+        return;
+    }
+
+    method void drawCross(int position){
+        var int offsetx, offsety;
+        if(position = 0)
+        {let offsetx = 0; let offsety = 162;}
+        if(position = 1)
+        {let offsetx = 81; let offsety = 162;}
+        if(position = 2)
+        {let offsetx = 162; let offsety = 162;}
+        if(position = 3)
+        {let offsetx = 0; let offsety = 81;}
+        if(position = 4)
+        {let offsetx = 81; let offsety = 81;}
+        if(position = 5)
+        {let offsetx = 162; let offsety = 81;}
+        if(position = 6)
+        {let offsetx = 0; let offsety = 0;}
+        if(position = 7)
+        {let offsetx = 81; let offsety = 0;}
+        if(position = 8)
+        {let offsetx = 162; let offsety = 0;}
+
+        do Screen.setColor(false);
+        do Screen.drawRectangle(185 + offsetx, 20 + offsety, 220 + offsetx, 76 + offsety);
+        do Screen.setColor(true);
+
+        do Screen.drawLine(141 + offsetx + offset, 14 + offsety, 208 + offsetx + offset, 81+ offsety);
+        do Screen.drawLine(142 + offsetx + offset, 14 + offsety, 209 + offsetx + offset, 81+ offsety);
+        do Screen.drawLine(143 + offsetx + offset, 14 + offsety, 210 + offsetx + offset, 81+ offsety);
+        do Screen.drawLine(144 + offsetx + offset, 14 + offsety, 211 + offsetx + offset, 81+ offsety);
+
+        do Screen.drawLine(141 + offsetx + offset, 81 + offsety, 208 + offsetx + offset, 14+ offsety);
+        do Screen.drawLine(142 + offsetx + offset, 81 + offsety, 209 + offsetx + offset, 14+ offsety);
+        do Screen.drawLine(143 + offsetx + offset, 81 + offsety, 210 + offsetx + offset, 14+ offsety);
+        do Screen.drawLine(144 + offsetx + offset, 81 + offsety, 211 + offsetx + offset, 14+ offsety);
+
+        return;
+    }
+
+    method void draw(int position, int sign){
+        if(sign = 10){
+            do drawCross(position);
+        }
+        else{
+            do drawCircle(position);
+        }
+        return;
+    }
+
+    method void WiningPosition(int sign, int position){
+        let za_vratiti = false;
+        let position = position + 1;
+        if(position = 1){
+            if(Board[4] = sign & Board[8] = sign){
+                let za_vratiti = true;
+            }
+            if(Board[1] = sign & Board[2] = sign){
+                let za_vratiti = true;
+            }
+            if(Board[3] = sign & Board[6] = sign){
+                let za_vratiti = true;
+            }
+        }
+        if(position = 2){
+            if(Board[0] = sign & Board[2] = sign){
+                let za_vratiti = true;
+            }
+            if(Board[4] = sign & Board[7] = sign){
+                let za_vratiti = true;
+            }
+        }
+        if(position = 3){
+            if(Board[4] = sign & Board[6] = sign){
+                let za_vratiti = true;
+            }
+            if(Board[1] = sign & Board[0] = sign){
+                let za_vratiti = true;
+            }
+            if(Board[5] = sign & Board[8] = sign){
+                let za_vratiti = true;
+            }
+        }
+        if(position = 4){
+            if(Board[0] = sign & Board[6] = sign){
+                let za_vratiti = true;
+            }
+            if(Board[4] = sign & Board[5] = sign){
+                let za_vratiti = true;
+            }
+        }
+        if(position = 5){
+            if(Board[0] = sign & Board[8] = sign){
+                let za_vratiti = true;
+            }
+            if(Board[1] = sign & Board[7] = sign){
+                let za_vratiti = true;
+            }
+            if(Board[5] = sign & Board[3] = sign){
+                let za_vratiti = true;
+            }
+            if(Board[2] = sign & Board[6] = sign){
+                let za_vratiti = true;
+            }
+        }
+        if(position = 6){
+            if(Board[2] = sign & Board[8] = sign){
+                let za_vratiti = true;
+                
+            }
+            if(Board[4] = sign & Board[3] = sign){
+                let za_vratiti = true;
+            }
+        }
+        if(position = 7){
+            if(Board[2] = sign & Board[4] = sign){
+                let za_vratiti = true;
+            }
+            if(Board[8] = sign & Board[7] = sign){
+                let za_vratiti = true;
+            }
+            if(Board[0] = sign & Board[3] = sign){
+                let za_vratiti = true;
+            }
+        }
+        if(position = 8){
+            if(Board[8] = sign & Board[6] = sign){
+                let za_vratiti = true;
+            }
+            if(Board[4] = sign & Board[1] = sign){
+                let za_vratiti = true;
+            }
+        }
+        if(position = 9){
+            if(Board[2] = sign & Board[5] = sign){
+                let za_vratiti = true;
+            }
+            if(Board[4] = sign & Board[0] = sign){
+                let za_vratiti = true;
+            }
+            if(Board[6] = sign & Board[7] = sign){
+                let za_vratiti = true;
+            }
+        }
+        if(za_vratiti){
+            do setGameState(sign);
+        }   
+        return;
+    }
+
+    method int emptySquares(){
+        let broj = 0;
+        let i = 0;
+        while(i < 9){
+            if(~(Board[i] = 10) & ~(Board[i] = 20)){
+                let broj = broj + 1;
+            }
+            let i = i + 1;
+        }
+        return broj;
+    }
+
+    method void MakeMove(int position, int znak){
+        do setBoardValue((position), znak);
+        do WiningPosition(znak, position);
+
+        return;
+    }
+}
